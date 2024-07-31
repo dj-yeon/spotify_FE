@@ -23,7 +23,7 @@ export interface Product {
   id: string;
   active?: boolean;
   name?: string;
-  desciption?: string;
+  description?: string;
   image?: string;
   metadata?: Stripe.Metadata;
 }
