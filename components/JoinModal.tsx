@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import useAuthModal from '@/hooks/useAuthModal';
+import useJoinModal from '@/hooks/useJoinModal';
 
 import Modal from './Modal';
 import Button from './Button';
@@ -13,24 +13,19 @@ import Input from './Input';
 import axiosInstance from '@/libs/axios';
 import { useUser } from '@/hooks/useUser';
 
-const AuthModal = () => {
+const JoinModal = () => {
   const { setAccessToken, setRefreshToken, setUser } = useUser();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // 오류 메시지 상태 추가
   const router = useRouter();
 
-  const { onClose, isOpen } = useAuthModal();
-
-  // useEffect(() => {
-  //   if (session) {
-  //     router.refresh();
-  //     onClose();
-  //   }
-  // }, [onClose, router, session]);
+  const { onClose, isOpen } = useJoinModal();
 
   const { register, handleSubmit, reset } = useForm<FieldValues>({
     defaultValues: {
-      id: '',
+      nickname: '',
+      email: '',
       password: '',
     },
   });
@@ -44,38 +39,22 @@ const AuthModal = () => {
   const onSubmit: SubmitHandler<FieldValues> = async (values) => {
     try {
       setIsLoading(true);
+      setErrorMessage(null); // 제출 시 오류 메시지 초기화
 
-      // 이메일과 비밀번호를 base64로 인코딩
-      const credentials = btoa(`${values.id}:${values.password}`);
-
-      // axiosInstance를 사용하여 로그인 요청을 보냅니다.
-      const response = await axiosInstance.post(
-        '/auth/login/email',
-        {},
-        {
-          headers: {
-            Authorization: `Basic ${credentials}`,
-          },
-        },
-      );
+      // axiosInstance를 사용하여 가입 요청을 보냅니다.
+      const response = await axiosInstance.post('/auth/register/email', {
+        nickname: values.nickname,
+        email: values.email,
+        password: values.password,
+      });
 
       const accessToken = response.data.accessToken; // 토큰을 저장
       const refreshToken = response.data.refreshToken;
-      const userDetail = response.data.userDetail;
       const subscriptionDetail = response.data.subscriptionDetail;
-
-      console.log('response.data:', response.data);
-
-      localStorage.setItem('user', JSON.stringify(userDetail));
-
-      const storedUser = localStorage.getItem('user');
-      console.log('Stored user in localStorage:', storedUser);
 
       // 로그인 성공 처리
       setAccessToken(accessToken); // 컨텍스트에 토큰 설정
       setRefreshToken(refreshToken);
-
-      setUser(userDetail);
 
       router.refresh();
 
@@ -84,17 +63,14 @@ const AuthModal = () => {
       reset();
 
       onClose();
-    } catch (error) {
+    } catch (error: any) {
+      setErrorMessage(error.response?.data?.message || 'Something went wrong'); // 오류 메시지 설정
       toast.error('Something went wrong');
 
       // 콘솔에 자세한 에러 정보 출력
-      if (error instanceof Error) {
-        console.error('Error message:', error.message);
-        console.error('Error name:', error.name);
-        console.error('Stack trace:', error.stack);
-      } else {
-        console.error('Unknown error:', error);
-      }
+      console.error('Error message:', error.message);
+      console.error('Error name:', error.name);
+      console.error('Stack trace:', error.stack);
     } finally {
       setIsLoading(false);
     }
@@ -102,16 +78,25 @@ const AuthModal = () => {
 
   return (
     <Modal
-      title="Welcome back"
-      description="Login to your account"
+      title="Welcome to join us"
+      description="Join our Site"
       isOpen={isOpen}
       onChange={onChange}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-4">
+        {errorMessage && (
+          <div className="text-red-500 text-sm mb-2">{errorMessage}</div>
+        )}
         <Input
-          id="id"
+          id="nickname"
           disabled={isLoading}
-          {...register('id', { required: true })}
+          {...register('nickname', { required: true })}
+          placeholder="Nickname"
+        />
+        <Input
+          id="email"
+          disabled={isLoading}
+          {...register('email', { required: true })}
           placeholder="Email"
         />
         <Input
@@ -122,11 +107,11 @@ const AuthModal = () => {
           type="password"
         />
         <Button disabled={isLoading} type="submit">
-          Log in
+          Join in!
         </Button>
       </form>
     </Modal>
   );
 };
 
-export default AuthModal;
+export default JoinModal;

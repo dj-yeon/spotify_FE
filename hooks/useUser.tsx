@@ -1,17 +1,15 @@
-import { Subscription, UserDetails } from '@/types';
-import { User } from '@supabase/auth-helpers-nextjs';
-import {
-  useSessionContext,
-  useUser as useSupaUser,
-} from '@supabase/auth-helpers-react';
+'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { Subscription, UserDetails } from '@/types';
 
 type UserContextType = {
   accessToken: string | null;
-  user: User | null;
-  userDetails: UserDetails | null;
+  user: any | null;
   isLoading: boolean;
   subscription: Subscription | null;
+  setAccessToken: (token: string | null) => void; // Add this setter
+  setRefreshToken: (token: string | null) => void;
+  setUser: (user: UserDetails | null) => void; // Corrected the type definition here
 };
 
 export const UserContext = createContext<UserContextType | undefined>(
@@ -23,61 +21,38 @@ export interface Props {
 }
 
 export const MyUserContextProvider = (props: Props) => {
-  const {
-    session,
-    // isLoading을 isLoadingUser라는 새로운 이름으로 바꿔서 사용
-    isLoading: isLoadingUser,
-    supabaseClient: supabase,
-  } = useSessionContext();
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
 
-  const user = useSupaUser();
+  // `localStorage`에서 초기 사용자 데이터를 불러옵니다.
+  const [user, setUser] = useState<UserDetails | null>(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  const accessToken = session?.access_token ?? null;
-
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const getUSerDetails = () => supabase.from('users').select('*').single();
-  const getSubscription = () =>
-    supabase
-      .from('subscriptions')
-      .select('*, prices(*, products(*))')
-      .in('status', ['trialing', 'active'])
-      .single();
-
+  // `user` 상태가 변경될 때마다 `localStorage`에 저장합니다.
   useEffect(() => {
-    if (user && !isLoadingData && !userDetails && !subscription) {
-      setIsLoadingData(true);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
 
-      Promise.allSettled([getUSerDetails(), getSubscription()]).then(
-        (results) => {
-          const userDetailsPromise = results[0];
-          const subscriptionPromise = results[1];
-
-          if (userDetailsPromise.status === 'fulfilled') {
-            setUserDetails(userDetailsPromise.value.data as UserDetails);
-          }
-
-          if (subscriptionPromise.status === 'fulfilled') {
-            setSubscription(subscriptionPromise.value.data as Subscription);
-          }
-
-          setIsLoadingData(false);
-        },
-      );
-    } else if (!user && !isLoadingUser && !isLoadingData) {
-      setUserDetails(null);
-      setSubscription(null);
+      const storedUser = localStorage.getItem('user');
+      console.log('Stored user in localStorage:', storedUser);
+    } else {
+      localStorage.removeItem('user');
     }
-  }, [user, isLoadingUser]);
+  }, [user]);
 
   const value = {
     accessToken,
     user,
-    userDetails,
-    isLoading: isLoadingUser || isLoadingData,
+    isLoading,
     subscription,
+    setAccessToken,
+    setRefreshToken,
+    setUser,
   };
 
   return <UserContext.Provider value={value} {...props} />;

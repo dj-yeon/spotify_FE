@@ -5,14 +5,18 @@ import { BiSearch } from 'react-icons/bi';
 import { HiHome } from 'react-icons/hi';
 import { RxCaretLeft, RxCaretRight } from 'react-icons/rx';
 import { twMerge } from 'tailwind-merge';
+
 import useAuthModal from '@/hooks/useAuthModal';
+import useJoinModal from '@/hooks/useJoinModal';
+import { useUser } from '@/hooks/useUser';
+import usePlayer from '@/hooks/usePlayer';
 
 import Button from './Button';
+import JoinModal from './JoinModal';
+
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useUser } from '@/hooks/useUser';
 import { FaUserAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import usePlayer from '@/hooks/usePlayer';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -22,6 +26,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const player = usePlayer();
   const authModal = useAuthModal();
+  const joinModal = useJoinModal();
   const router = useRouter();
 
   const supabaseClient = useSupabaseClient();
@@ -29,6 +34,9 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
 
   const handleLogout = async () => {
     const { error } = await supabaseClient.auth.signOut();
+
+    localStorage.removeItem('user');
+
     player.reset();
     router.refresh();
 
@@ -151,7 +159,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             <>
               <div>
                 <Button
-                  onClick={authModal.onOpen}
+                  onClick={joinModal.onOpen}
                   className="
                     bg-transparent
                     text-neutral-300
