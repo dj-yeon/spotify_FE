@@ -14,7 +14,7 @@ import axiosInstance from '@/libs/axios';
 import { useUser } from '@/hooks/useUser';
 
 const JoinModal = () => {
-  const { setAccessToken, setRefreshToken, setUser } = useUser();
+  const { setUser } = useUser();
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // 오류 메시지 상태 추가
@@ -52,9 +52,8 @@ const JoinModal = () => {
       const refreshToken = response.data.refreshToken;
       const subscriptionDetail = response.data.subscriptionDetail;
 
-      // 로그인 성공 처리
-      setAccessToken(accessToken); // 컨텍스트에 토큰 설정
-      setRefreshToken(refreshToken);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
 
       router.refresh();
 

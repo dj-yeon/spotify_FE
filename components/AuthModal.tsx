@@ -14,7 +14,7 @@ import axiosInstance from '@/libs/axios';
 import { useUser } from '@/hooks/useUser';
 
 const AuthModal = () => {
-  const { setAccessToken, setRefreshToken, setUser } = useUser();
+  const { setUser } = useUser();
 
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -71,9 +71,8 @@ const AuthModal = () => {
       const storedUser = localStorage.getItem('user');
       console.log('Stored user in localStorage:', storedUser);
 
-      // 로그인 성공 처리
-      setAccessToken(accessToken); // 컨텍스트에 토큰 설정
-      setRefreshToken(refreshToken);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
 
       setUser(userDetail);
 

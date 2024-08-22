@@ -38,12 +38,13 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
     localStorage.removeItem('user');
 
     player.reset();
-    router.refresh();
+    // router.refresh();
 
     if (error) {
       toast.error(error.message);
     } else {
       toast.success('Logged out!');
+      window.location.reload(); // 페이지 새로고침
     }
   };
 

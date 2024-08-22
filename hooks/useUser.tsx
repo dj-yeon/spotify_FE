@@ -1,15 +1,13 @@
 'use client';
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Subscription, UserDetails } from '@/types';
 
 type UserContextType = {
-  accessToken: string | null;
-  user: any | null;
+  user: UserDetails | null;
   isLoading: boolean;
   subscription: Subscription | null;
-  setAccessToken: (token: string | null) => void; // Add this setter
-  setRefreshToken: (token: string | null) => void;
-  setUser: (user: UserDetails | null) => void; // Corrected the type definition here
+  setUser: (user: UserDetails | null) => void;
 };
 
 export const UserContext = createContext<UserContextType | undefined>(
@@ -21,37 +19,31 @@ export interface Props {
 }
 
 export const MyUserContextProvider = (props: Props) => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-
-  // `localStorage`에서 초기 사용자 데이터를 불러옵니다.
-  const [user, setUser] = useState<UserDetails | null>(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-
+  const [user, setUser] = useState<UserDetails | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // `user` 상태가 변경될 때마다 `localStorage`에 저장합니다.
+  useEffect(() => {
+    // 이 부분은 클라이언트에서만 실행됩니다.
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
-
-      const storedUser = localStorage.getItem('user');
-      console.log('Stored user in localStorage:', storedUser);
+      console.log('Stored user in localStorage:', user);
     } else {
       localStorage.removeItem('user');
     }
   }, [user]);
 
   const value = {
-    accessToken,
     user,
     isLoading,
     subscription,
-    setAccessToken,
-    setRefreshToken,
     setUser,
   };
 
