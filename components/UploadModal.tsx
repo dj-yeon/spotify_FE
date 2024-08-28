@@ -2,9 +2,7 @@
 
 import useUploadModal from '@/hooks/useUploadModal';
 import { useUser } from '@/hooks/useUser';
-
 import { useState } from 'react';
-
 import uniqid from 'uniqid';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -12,24 +10,48 @@ import toast from 'react-hot-toast';
 import Modal from './Modal';
 import Input from './Input';
 import Button from './Button';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import axiosInstance from '@/libs/axios';
 import { useRouter } from 'next/navigation';
 
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const uploadModal = useUploadModal();
   const { user } = useUser();
-  const supabaseClient = useSupabaseClient();
   const router = useRouter();
 
-  const { register, handleSubmit, reset } = useForm<FieldValues>({
-    defaultValues: {
-      author: '',
-      title: '',
-      song: null,
-      image: null,
-    },
-  });
+  const { register, handleSubmit, reset, setValue, getValues } =
+    useForm<FieldValues>({
+      defaultValues: {
+        author: '',
+        title: '',
+        song: '',
+        image: '',
+      },
+    });
+
+  // When selecting a file, upload it first.
+  const handleFileUpload = async (file: File, type: 'image' | 'song') => {
+    const formData = new FormData();
+    formData.append(type, file);
+
+    try {
+      const response = await axiosInstance.post(`/common/${type}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // AccessToken 추가
+        },
+      });
+
+      console.log('Upload successful:', response);
+
+      return response.data.fileName;
+    } catch (error) {
+      console.error(`Failed to upload ${type}:`, error);
+      toast.error(`Failed to upload ${type}.`);
+      throw error;
+      ``;
+    }
+  };
 
   const onChange = (open: boolean) => {
     if (!open) {
@@ -42,57 +64,29 @@ const UploadModal = () => {
     try {
       setIsLoading(true);
 
-      const imageFile = values.image?.[0];
-      const songFile = values.song?.[0];
-
-      if (!imageFile || !songFile || !user) {
+      if (!values.image || !values.song || !values.title || !values.author) {
         toast.error('Missing fields');
         return;
       }
 
-      const uniqueID = uniqid();
+      const imageValue = getValues('image') || null;
+      const songValue = getValues('song') || null;
 
-      // upload song
-      const { data: songData, error: songError } = await supabaseClient.storage
-        .from('songs')
-        .upload(`song-${values.title}-${uniqueID}`, songFile, {
-          cacheControl: '3600',
-          upsert: false,
-        });
-
-      if (songError) {
-        setIsLoading(false);
-        return toast.error('Failed song upload.');
-      }
-
-      // upload image
-      const { data: imageData, error: imageError } =
-        await supabaseClient.storage
-          .from('images')
-          .upload(`image-${values.title}-${uniqueID}`, imageFile, {
-            cacheControl: '3600',
-            upsert: false,
-          });
-
-      if (imageError) {
-        setIsLoading(false);
-        return toast.error('Failed image upload.');
-      }
-
-      const { error: supabaseError } = await supabaseClient
-        .from('songs')
-        .insert({
-          user_id: user.id,
+      // postPosts 엔드포인트로 전송
+      await axiosInstance.post(
+        'posts/song',
+        {
           title: values.title,
           author: values.author,
-          image_path: imageData.path,
-          song_path: songData.path,
-        });
-
-      if (supabaseError) {
-        setIsLoading(false);
-        return toast.error(supabaseError.message);
-      }
+          imageFileName: imageValue, // 업로드된 이미지 파일 경로 사용
+          songFileName: songValue, // 업로드된 노래 파일 경로 사용
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // AccessToken 추가
+          },
+        },
+      );
 
       router.refresh();
       setIsLoading(false);
@@ -100,6 +94,7 @@ const UploadModal = () => {
       reset();
       uploadModal.onClose();
     } catch (error) {
+      console.error('Error details:', error);
       toast.error('Something went wrong');
     } finally {
       setIsLoading(false);
@@ -109,7 +104,7 @@ const UploadModal = () => {
   return (
     <Modal
       title="Add a song"
-      description="Upload an mp3 file "
+      description="Upload an mp3 file"
       isOpen={uploadModal.isOpen}
       onChange={onChange}
     >
@@ -133,7 +128,13 @@ const UploadModal = () => {
             type="file"
             disabled={isLoading}
             accept=".mp3"
-            {...register('song', { required: true })}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const fileName = await handleFileUpload(file, 'song');
+                setValue('song', fileName); // 업로드된 파일 경로를 설정
+              }
+            }}
           />
         </div>
         <div>
@@ -143,7 +144,13 @@ const UploadModal = () => {
             type="file"
             disabled={isLoading}
             accept="image/*"
-            {...register('image', { required: true })}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const fileName = await handleFileUpload(file, 'image');
+                setValue('image', fileName); // 업로드된 파일 경로를 설정
+              }
+            }}
           />
         </div>
         <Button disabled={isLoading} type="submit">

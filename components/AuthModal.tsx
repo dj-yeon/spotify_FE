@@ -62,14 +62,11 @@ const AuthModal = () => {
       const accessToken = response.data.accessToken; // 토큰을 저장
       const refreshToken = response.data.refreshToken;
       const userDetail = response.data.userDetail;
-      const subscriptionDetail = response.data.subscriptionDetail;
-
-      console.log('response.data:', response.data);
+      // const subscriptionDetail = response.data.subscriptionDetail;
 
       localStorage.setItem('user', JSON.stringify(userDetail));
 
       const storedUser = localStorage.getItem('user');
-      console.log('Stored user in localStorage:', storedUser);
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);

@@ -17,6 +17,7 @@ import JoinModal from './JoinModal';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { FaUserAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { useEffect, useState } from 'react';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -32,10 +33,22 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const supabaseClient = useSupabaseClient();
   const { user } = useUser();
 
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // 클라이언트 측에서만 실행됨
+      const token = localStorage.getItem('accessToken');
+      setAccessToken(token);
+    }
+
+    console.log(accessToken, 'accessToken');
+  }, []);
   const handleLogout = async () => {
     const { error } = await supabaseClient.auth.signOut();
 
     localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
 
     player.reset();
     // router.refresh();
@@ -138,7 +151,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             gap-x-4
         "
         >
-          {user ? (
+          {accessToken != null ? (
             <div
               className="
                 flex 
