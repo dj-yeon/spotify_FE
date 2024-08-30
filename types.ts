@@ -1,12 +1,32 @@
 import Stripe from 'stripe';
 
+// export interface Song {
+//   id: string;
+//   user_id: string;
+//   author: string;
+//   title: string;
+//   song_path: string;
+//   image_path: string;
+// }
+
 export interface Song {
   id: string;
-  user_id: string;
-  author: string;
-  title: string;
-  song_path: string;
-  image_path: string;
+  title: string | null;
+  author: string | null;
+  user: UsersModel;
+  // likedByUsers: LikedSong[];
+  imageFileName: string;
+  songFileName: string;
+}
+
+export interface UsersModel {
+  nickname: string;
+  email: string;
+  // role: RolesEnum;
+  // posts: PostsModel[];
+  // likedSongs: LikedSong[];
+  songs: Song[];
+  subscriptions: Subscription[];
 }
 
 export interface UserDetails {

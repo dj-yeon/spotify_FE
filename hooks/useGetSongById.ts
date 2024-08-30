@@ -1,12 +1,12 @@
+import axiosInstance from '@/libs/axios';
 import { Song } from '@/types';
-import { useSessionContext } from '@supabase/auth-helpers-react';
+import { AxiosError } from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const useGetSongById = (id?: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [song, setSong] = useState<Song | undefined>(undefined);
-  const { supabaseClient } = useSessionContext();
 
   useEffect(() => {
     if (!id) {
@@ -16,23 +16,27 @@ const useGetSongById = (id?: string) => {
     setIsLoading(true);
 
     const fetchSong = async () => {
-      const { data, error } = await supabaseClient
-        .from('songs')
-        .select('*')
-        .eq('id', id)
-        .single();
+      try {
+        const response = await axiosInstance.get(`/common/getsongbyid/${id}`);
 
-      if (error) {
+        const data = response.data;
+
+        setSong(data);
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          // AxiosError인 경우
+          toast.error(error.response?.data?.message || error.message);
+        } else {
+          // 그 외의 에러인 경우
+          toast.error('An unexpected error occurred');
+        }
+      } finally {
         setIsLoading(false);
-        return toast.error(error.message);
       }
-
-      setSong(data as Song);
-      setIsLoading(false);
     };
 
     fetchSong();
-  }, [id, supabaseClient]);
+  }, [id]);
 
   return useMemo(() => ({ isLoading, song }), [isLoading, song]);
 };

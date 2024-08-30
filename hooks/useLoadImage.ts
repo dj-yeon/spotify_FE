@@ -1,18 +1,52 @@
+// import { Song } from '@/types';
+
+// const useLoadImage = (song: Song) => {
+//   if (!song || !song.imageFileName) {
+//     return null;
+//   }
+
+//   const imagePath = `http://localhost:8000/public/posts-image/${song.imageFileName}`;
+
+//   return imagePath;
+// };
+
+// export default useLoadImage;
+
+import axiosInstance from '@/libs/axios';
 import { Song } from '@/types';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useState, useEffect } from 'react';
 
 const useLoadImage = (song: Song) => {
-  const supabaseClient = useSupabaseClient();
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-  if (!song) {
-    return null;
-  }
+  useEffect(() => {
+    if (!song || !song.imageFileName) {
+      return;
+    }
 
-  const { data: imageData } = supabaseClient.storage
-    .from('images')
-    .getPublicUrl(song.image_path);
+    const fetchImage = async () => {
+      try {
+        const response = await axiosInstance.get(
+          `/common/image/${song.imageFileName}`,
+          {
+            responseType: 'blob', // 이미지 데이터를 Blob으로 받아오기
+          },
+        );
+        const imageBlob = new Blob([response.data], {
+          type: response.headers['content-type'],
+        });
+        const imageObjectUrl = URL.createObjectURL(imageBlob);
+        setImageUrl(imageObjectUrl);
+      } catch (error) {
+        console.error('Failed to load image:', error);
+        setImageUrl('/images/liked.png'); // 기본 이미지 설정
+      }
+    };
 
-  return imageData.publicUrl;
+    fetchImage();
+  }, [song]);
+
+  return imageUrl;
 };
 
 export default useLoadImage;
