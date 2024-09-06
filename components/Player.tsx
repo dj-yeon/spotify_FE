@@ -6,11 +6,8 @@ import usePlayer from '@/hooks/usePlayer';
 import PlayerContent from './PlayerContent';
 
 const Player = () => {
-
   // id로 플레이리스트 줄 세우기
   const player = usePlayer();
-
-  console.log('*********** player', player);
 
   const { song } = useGetSongById(player.activeId);
 

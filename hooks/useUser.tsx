@@ -34,7 +34,6 @@ export const MyUserContextProvider = (props: Props) => {
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
-      console.log('Stored user in localStorage:', user);
     } else {
       localStorage.removeItem('user');
     }

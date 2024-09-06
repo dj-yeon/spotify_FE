@@ -12,9 +12,12 @@ import Button from './Button';
 import Input from './Input';
 import axiosInstance from '@/libs/axios';
 import { useUser } from '@/hooks/useUser';
+import { useAccessToken } from '../hooks/AccessTokenContext';
 
 const JoinModal = () => {
   const { setUser } = useUser();
+
+  const { setAccessToken } = useAccessToken();
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // 오류 메시지 상태 추가
@@ -54,6 +57,9 @@ const JoinModal = () => {
 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
+
+      // 토큰 설정 후 상태 갱신
+      setAccessToken(accessToken);
 
       router.refresh();
 

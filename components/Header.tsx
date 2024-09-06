@@ -14,10 +14,10 @@ import usePlayer from '@/hooks/usePlayer';
 import Button from './Button';
 import JoinModal from './JoinModal';
 
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { FaUserAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import { useEffect, useState } from 'react';
+import { useAccessToken } from '../hooks/AccessTokenContext';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -30,35 +30,38 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const joinModal = useJoinModal();
   const router = useRouter();
 
-  const supabaseClient = useSupabaseClient();
   const { user } = useUser();
 
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { accessToken, setAccessToken } = useAccessToken();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // 클라이언트 측에서만 실행됨
       const token = localStorage.getItem('accessToken');
-      setAccessToken(token);
+      if (token) {
+        setAccessToken(token);
+      }
     }
+  }, []); // 빈 배열로 useEffect를 설정해 처음에만 실행되도록 함
 
-    console.log(accessToken, 'accessToken');
-  }, []);
+  useEffect(() => {
+    if (accessToken) {
+      router.refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]); // accessToken이 변경될 때만 router.refresh()가 호출되도록 설정
+
   const handleLogout = async () => {
-    const { error } = await supabaseClient.auth.signOut();
-
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setAccessToken(null); // 상태 초기화
 
     player.reset();
-    // router.refresh();
+    router.refresh();
 
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success('Logged out!');
-      window.location.reload(); // 페이지 새로고침
-    }
+    toast.success('Logged out!');
+    window.location.reload(); // 페이지 새로고침
   };
 
   return (
@@ -151,7 +154,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             gap-x-4
         "
         >
-          {accessToken != null ? (
+          {accessToken ? (
             <div
               className="
                 flex 

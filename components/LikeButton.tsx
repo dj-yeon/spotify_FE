@@ -2,11 +2,12 @@
 
 import useAuthModal from '@/hooks/useAuthModal';
 import { useUser } from '@/hooks/useUser';
-import { useSessionContext } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
+import axios from 'axios';
+import axiosInstance from '@/libs/axios';
 
 interface LikeButtonProps {
   songId: string;
@@ -14,33 +15,37 @@ interface LikeButtonProps {
 
 const LikeButton: React.FC<LikeButtonProps> = ({ songId }) => {
   const router = useRouter();
-  const { supabaseClient } = useSessionContext();
-
   const authModal = useAuthModal();
   const { user } = useUser();
 
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
-    if (!user?.id) {
-      return;
-    }
-
     const fetchData = async () => {
-      const { data, error } = await supabaseClient
-        .from('liked_songs')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('song_id', songId)
-        .single();
+      if (!user?.email) {
+        return;
+      }
 
-      if (!error && data) {
-        setIsLiked(true);
+      try {
+        const response = await axiosInstance.get(
+          `/posts/isLikedSong/${songId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // AccessToken 추가
+            },
+          },
+        );
+
+        if (response.data.isLiked) {
+          setIsLiked(true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch like status', error);
       }
     };
 
     fetchData();
-  }, [songId, supabaseClient, user?.id]);
+  }, [songId, user?.email]);
 
   const Icon = isLiked ? AiFillHeart : AiOutlineHeart;
 
@@ -49,30 +54,29 @@ const LikeButton: React.FC<LikeButtonProps> = ({ songId }) => {
       return authModal.onOpen();
     }
 
-    if (isLiked) {
-      const { error } = await supabaseClient
-        .from('liked_songs')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('song_id', songId);
-
-      if (error) {
-        toast.error(error.message);
-      } else {
+    try {
+      if (isLiked) {
+        await axiosInstance.delete(`/posts/likedSong/${songId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        });
         setIsLiked(false);
-      }
-    } else {
-      const { error } = await supabaseClient.from('liked_songs').insert({
-        song_id: songId,
-        user_id: user.id,
-      });
-
-      if (error) {
-        toast.error(error.message);
       } else {
+        await axiosInstance.post(
+          `/posts/likedSong`,
+          { songId },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            },
+          },
+        );
         setIsLiked(true);
         toast.success('Liked!');
       }
+    } catch (error) {
+      toast.error('Failed to update like status');
     }
 
     router.refresh();

@@ -77,6 +77,8 @@ const AuthModal = () => {
 
       toast.success('Logged in successfully!');
 
+      window.location.reload(); // 페이지 새로고침
+
       reset();
 
       onClose();

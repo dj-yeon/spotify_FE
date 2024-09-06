@@ -23,6 +23,7 @@ const Library: React.FC<LibraryProps> = ({ songs }) => {
 
   const onPlay = useOnPlay(songs);
 
+
   const onClick = () => {
     // if (!user) {
     //   return authModal.onOpen();
