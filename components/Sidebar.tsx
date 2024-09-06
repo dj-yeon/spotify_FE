@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { BiSearch } from 'react-icons/bi';
 import { HiHome } from 'react-icons/hi';
 import Box from './Box';
@@ -10,15 +10,32 @@ import Library from './Library';
 import { Song } from '@/types';
 import usePlayer from '@/hooks/usePlayer';
 import { twMerge } from 'tailwind-merge';
+import getSongsByUserId from '@/actions/getSongsByUserId';
 
 interface SidebarProps {
   children: React.ReactNode;
-  songs: Song[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ children, songs }) => {
+const Sidebar: React.FC<SidebarProps> = ({ children }) => {
   const pathname = usePathname();
   const player = usePlayer();
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [loading, setLoading] = useState<boolean>(true); // 로딩 상태 추가
+
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const userSongs = await getSongsByUserId();
+        setSongs(userSongs);
+      } catch (error) {
+        console.error('Failed to fetch songs', error);
+      } finally {
+        setLoading(false); // 로딩 완료
+      }
+    };
+
+    fetchSongs();
+  }, []);
 
   const routes = useMemo(
     () => [
@@ -52,7 +69,11 @@ const Sidebar: React.FC<SidebarProps> = ({ children, songs }) => {
           ))}
         </Box>
         <Box className="overflow-y-auto h-full">
-          <Library songs={songs} />
+          {loading ? ( // 로딩 중일 때 로딩 메시지 표시
+            <div className="text-white">Loading songs...</div>
+          ) : (
+            <Library songs={songs} />
+          )}
         </Box>
       </div>
       <main className="h-full flex-1 overflow-y-auto py-2">{children}</main>

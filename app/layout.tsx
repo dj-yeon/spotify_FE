@@ -9,6 +9,9 @@ import ToasterProvider from '@/providers/ToasterProvider';
 import getSongsByUserId from '@/actions/getSongsByUserId';
 import Player from '@/components/Player';
 import getActiveProductsWithPrices from '@/actions/getActiveProductsWithPrices';
+import { AccessTokenProvider } from '@/hooks/AccessTokenContext';
+
+// app/layout.tsx
 
 const font = Figtree({ subsets: ['latin'] });
 
@@ -24,7 +27,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const userSongs = await getSongsByUserId();
+  // const userSongs = await getSongsByUserId();
   const products = await getActiveProductsWithPrices();
 
   return (
@@ -33,9 +36,13 @@ export default async function RootLayout({
         <ToasterProvider />
         <SupabaseProvider>
           <UserProvider>
-            <ModalProvider products={products} />
-            <Sidebar songs={userSongs}>{children}</Sidebar>
-            <Player />
+            <AccessTokenProvider>
+              <ModalProvider products={products} />
+              {/* <Sidebar songs={userSongs}>{children}</Sidebar> */}
+              <Sidebar>{children}</Sidebar>
+
+              <Player />
+            </AccessTokenProvider>
           </UserProvider>
         </SupabaseProvider>
       </body>
