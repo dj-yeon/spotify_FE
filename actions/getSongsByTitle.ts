@@ -1,29 +1,38 @@
+'use client';
+
+// actions/getSongsByTitle.ts
+
+import axiosInstance from '@/libs/axios';
 import { Song } from '@/types';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import getSongs from './getSong';
 
 const getSongsByTitle = async (title: string): Promise<Song[]> => {
-  const supabase = createServerComponentClient({
-    cookies: cookies,
-  });
+  try {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      console.error('Access token is missing');
+      return [];
+    }
 
-  if (!title) {
-    const allSongs = await getSongs();
-    return allSongs;
+    const response = await axiosInstance.get(`/posts/getSongsByTitle`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        title, // title을 쿼리 파라미터로 전달
+      },
+    });
+    if (!response || !response.data) {
+      return [];
+    }
+
+    return response.data.map((item: any) => ({
+      id: item.id.toString(),
+      ...item,
+    }));
+  } catch (error) {
+    console.error('Failed to fetch songs:', error);
+    return [];
   }
-
-  const { data, error } = await supabase
-    .from('songs')
-    .select('*')
-    .ilike('title', `%${title}%`)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.log(error);
-  }
-
-  return (data as any) || [];
 };
 
 export default getSongsByTitle;
