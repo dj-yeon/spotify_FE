@@ -1,18 +1,18 @@
-'use client';
-
 // actions/getSongsByUserId.ts
 
 import axiosInstance from '@/libs/axios';
 import { Song } from '@/types';
+import { cookies } from 'next/headers';
 
 const getSongsByUserId = async (): Promise<Song[]> => {
   try {
-    const token = localStorage.getItem('accessToken');
+    const cookieStore = cookies();
+    const token = cookieStore.get('accessToken')?.value; // accessToken 쿠키를 가져옴
+
     if (!token) {
-      console.error('Access token is missing');
+      // console.error('Access token is missing');
       return [];
     }
-
     const response = await axiosInstance.get(`/posts/getSongsByUserId`, {
       headers: {
         Authorization: `Bearer ${token}`,

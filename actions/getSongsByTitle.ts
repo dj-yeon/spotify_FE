@@ -1,15 +1,15 @@
-'use client';
-
 // actions/getSongsByTitle.ts
-
 import axiosInstance from '@/libs/axios';
 import { Song } from '@/types';
+import { cookies } from 'next/headers';
 
 const getSongsByTitle = async (title: string): Promise<Song[]> => {
   try {
-    const token = localStorage.getItem('accessToken');
+    const cookieStore = cookies();
+    const token = cookieStore.get('accessToken')?.value; // accessToken 쿠키를 가져옴
+
     if (!token) {
-      console.error('Access token is missing');
+      // console.error('Access token is missing');
       return [];
     }
 
@@ -21,6 +21,7 @@ const getSongsByTitle = async (title: string): Promise<Song[]> => {
         title, // title을 쿼리 파라미터로 전달
       },
     });
+
     if (!response || !response.data) {
       return [];
     }

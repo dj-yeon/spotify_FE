@@ -5,29 +5,14 @@ import LikeButton from '@/components/LikeButton';
 import MediaItem from '@/components/MediaItem';
 import useOnPlay from '@/hooks/useOnPlay';
 import { Song } from '@/types';
-import { useEffect, useState } from 'react';
 
 interface SearchContentProps {
-  searchParams: {
-    title: string;
-  };
+
+  songs: Song[];
 }
 
-const SearchContent: React.FC<SearchContentProps> = ({ searchParams }) => {
-  const [songs, setSongs] = useState<Song[]>([]);
+const SearchContent: React.FC<SearchContentProps> = ({ songs }) => {
   const onPlay = useOnPlay(songs);
-
-  // API 요청을 통해 노래 데이터를 가져오는 useEffect 훅
-  useEffect(() => {
-    const fetchSongs = async () => {
-      const songsData = await getSongsByTitle(searchParams.title);
-      setSongs(songsData);
-    };
-
-    if (searchParams.title) {
-      fetchSongs();
-    }
-  }, [searchParams.title]);
 
   if (songs.length === 0) {
     return (

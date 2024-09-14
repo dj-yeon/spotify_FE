@@ -12,12 +12,11 @@ import Button from './Button';
 import Input from './Input';
 import axiosInstance from '@/libs/axios';
 import { useUser } from '@/hooks/useUser';
-import { useAccessToken } from '../hooks/AccessTokenContext';
+import Select from './Selectbox';
+import { RolesEnum } from '@/types';
 
 const JoinModal = () => {
   const { setUser } = useUser();
-
-  const { setAccessToken } = useAccessToken();
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null); // 오류 메시지 상태 추가
@@ -30,6 +29,7 @@ const JoinModal = () => {
       nickname: '',
       email: '',
       password: '',
+      role: '',
     },
   });
 
@@ -49,21 +49,25 @@ const JoinModal = () => {
         nickname: values.nickname,
         email: values.email,
         password: values.password,
+        role: values.role,
       });
 
       const accessToken = response.data.accessToken; // 토큰을 저장
       const refreshToken = response.data.refreshToken;
-      const subscriptionDetail = response.data.subscriptionDetail;
+      const userDetail = response.data.userDetail;
+      // const subscriptionDetail = response.data.subscriptionDetail;
 
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      // accessToken을 HTTP-only 쿠키에 저장
+      document.cookie = `accessToken=${accessToken}; Path=/; Secure; SameSite=Strict`;
+      document.cookie = `refreshToken=${refreshToken}; Path=/; Secure; SameSite=Strict`;
 
-      // 토큰 설정 후 상태 갱신
-      setAccessToken(accessToken);
+      setUser(userDetail);
 
       router.refresh();
 
       toast.success('Logged in successfully!');
+
+      //      window.location.reload(); // 페이지 새로고침
 
       reset();
 
@@ -111,6 +115,16 @@ const JoinModal = () => {
           placeholder="Password"
           type="password"
         />
+        <Select
+          id="role"
+          disabled={isLoading}
+          {...register('role', { required: true })}
+          defaultValue={RolesEnum.USER} // 기본값 설정
+        >
+          <option value={RolesEnum.USER}>User</option>
+          <option value={RolesEnum.ADMIN}>Admin</option>
+        </Select>
+
         <Button disabled={isLoading} type="submit">
           Join in!
         </Button>

@@ -1,67 +1,12 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import axiosInstance from '@/libs/axios';
 import Header from '@/components/Header';
 import Image from 'next/image';
 import LikedContent from './components/LikedContent';
-import { Song } from '@/types';
+import getLikedSongs from '@/actions/getLikedSongs';
 
-const Liked = () => {
-  const [songs, setSongs] = useState<Song[]>([]);
-  const [error, setError] = useState<boolean>(false);
+export const revalidate = 0;
 
-  useEffect(() => {
-    const getLikedSongs = async (): Promise<Song[]> => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-          console.error('Access token is missing');
-          setError(true);
-          return [];
-        }
-
-        const response = await axiosInstance.get(`/posts/getLikedSongs`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-
-        if (!response || !response.data) {
-          return [];
-        }
-
-        if (Array.isArray(response.data)) {
-          return response.data.map((item: any) => ({
-            ...item,
-          }));
-        } else {
-          console.error('Unexpected response data format:', response.data);
-          setError(true);
-          return [];
-        }
-      } catch (error) {
-        console.error('Failed to fetch songs:', error);
-        setError(true);
-        return [];
-      }
-    };
-
-    getLikedSongs().then(setSongs);
-  }, []);
-
-  if (error) {
-    return (
-      <div className="bg-neutral-900 rounded-lg h-full w-full overflow-hidden overflow-y-auto">
-        <Header>
-          <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-bold">
-            Failed to load liked songs
-          </h1>
-        </Header>
-      </div>
-    );
-  }
+const Liked = async () => {
+  const songs = await getLikedSongs();
 
   return (
     <div className="bg-neutral-900 rounded-lg h-full w-full overflow-hidden overflow-y-auto">

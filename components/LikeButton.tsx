@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
-import axios from 'axios';
 import axiosInstance from '@/libs/axios';
+
+import Cookies from 'js-cookie';
 
 interface LikeButtonProps {
   songId: string;
@@ -20,18 +21,26 @@ const LikeButton: React.FC<LikeButtonProps> = ({ songId }) => {
 
   const [isLiked, setIsLiked] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user?.email) {
-        return;
-      }
+  // 토큰을 한 번만 가져옴
+  const token = Cookies.get('accessToken');
 
+  useEffect(() => {
+    if (!token) {
+      // console.error('Access token is missing');
+      return;
+    }
+
+    if (!user?.email) {
+      return;
+    }
+
+    const fetchData = async () => {
       try {
         const response = await axiosInstance.get(
           `/posts/isLikedSong/${songId}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // AccessToken 추가
+              Authorization: `Bearer ${token}`, // AccessToken 추가
             },
           },
         );
@@ -45,7 +54,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({ songId }) => {
     };
 
     fetchData();
-  }, [songId, user?.email]);
+  }, [songId, user?.email, token]); // token이 변경될 가능성을 대비하여 의존성 배열에 추가
 
   const Icon = isLiked ? AiFillHeart : AiOutlineHeart;
 
@@ -54,11 +63,16 @@ const LikeButton: React.FC<LikeButtonProps> = ({ songId }) => {
       return authModal.onOpen();
     }
 
+    if (!token) {
+      // console.error('Access token is missing');
+      return;
+    }
+
     try {
       if (isLiked) {
         await axiosInstance.delete(`/posts/likedSong/${songId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         setIsLiked(false);
@@ -68,7 +82,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({ songId }) => {
           { songId },
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+              Authorization: `Bearer ${token}`,
             },
           },
         );

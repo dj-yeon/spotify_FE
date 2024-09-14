@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Subscription, UserDetails } from '@/types';
+import Cookies from 'js-cookie';
+import axiosInstance from '@/libs/axios';
 
 type UserContextType = {
   user: UserDetails | null;
@@ -22,22 +24,50 @@ export const MyUserContextProvider = (props: Props) => {
   const [user, setUser] = useState<UserDetails | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // 토큰을 한 번만 가져옴
+  const token = Cookies.get('accessToken');
+
+  const handleLogout = async () => {
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    setUser(null);
+    setIsLoggedIn(false);
+  };
+
+  // 비동기 데이터 로드 함수
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axiosInstance.get(`/auth/userdetail`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // AccessToken 추가
+        },
+      });
+      setUser(response.data);
+    } catch (error: any) {
+      console.error('Failed to fetch user details', error);
+      if (error.response && error.response.status === 401) {
+        handleLogout();
+      } else {
+        setUser(null); // 기타 오류 발생 시 사용자 상태 초기화
+      }
+    } finally {
+      setIsLoading(false); // 로딩 상태 완료
+    }
+  };
 
   useEffect(() => {
-    // 이 부분은 클라이언트에서만 실행됩니다.
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    if (!token) {
+      // console.error('Access token is missing');
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
+    if (!user && token) {
+      fetchData(); // 데이터 불러오기
     }
-  }, [user]);
+  }, [token, user]);
 
   const value = {
     user,

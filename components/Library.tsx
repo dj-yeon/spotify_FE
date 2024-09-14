@@ -23,11 +23,10 @@ const Library: React.FC<LibraryProps> = ({ songs }) => {
 
   const onPlay = useOnPlay(songs);
 
-
   const onClick = () => {
-    // if (!user) {
-    //   return authModal.onOpen();
-    // }
+    if (!user) {
+      return authModal.onOpen();
+    }
 
     // if (!subscription) {
     //   return subscribeModal.onOpen();

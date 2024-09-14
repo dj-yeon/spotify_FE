@@ -13,6 +13,8 @@ import Button from './Button';
 import axiosInstance from '@/libs/axios';
 import { useRouter } from 'next/navigation';
 
+import Cookies from 'js-cookie';
+
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const uploadModal = useUploadModal();
@@ -29,6 +31,13 @@ const UploadModal = () => {
       },
     });
 
+  const token = Cookies.get('accessToken'); // 클라이언트 측 쿠키에서 토큰을 가져옴
+
+  if (!token) {
+    // console.error('Access token is missing');
+    return [];
+  }
+
   // When selecting a file, upload it first.
   const handleFileUpload = async (file: File, type: 'image' | 'song') => {
     const formData = new FormData();
@@ -38,7 +47,7 @@ const UploadModal = () => {
       const response = await axiosInstance.post(`/common/${type}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // AccessToken 추가
+          Authorization: `Bearer ${token}`, // AccessToken 추가
         },
       });
 
@@ -83,7 +92,7 @@ const UploadModal = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // AccessToken 추가
+            Authorization: `Bearer ${token}`, // AccessToken 추가
           },
         },
       );

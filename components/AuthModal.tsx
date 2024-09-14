@@ -64,12 +64,9 @@ const AuthModal = () => {
       const userDetail = response.data.userDetail;
       // const subscriptionDetail = response.data.subscriptionDetail;
 
-      localStorage.setItem('user', JSON.stringify(userDetail));
-
-      const storedUser = localStorage.getItem('user');
-
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      // accessToken을 HTTP-only 쿠키에 저장
+      document.cookie = `accessToken=${accessToken}; Path=/; Secure; SameSite=Strict`;
+      document.cookie = `refreshToken=${refreshToken}; Path=/; Secure; SameSite=Strict`;
 
       setUser(userDetail);
 
@@ -77,7 +74,7 @@ const AuthModal = () => {
 
       toast.success('Logged in successfully!');
 
-      window.location.reload(); // 페이지 새로고침
+      //      window.location.reload(); // 페이지 새로고침
 
       reset();
 

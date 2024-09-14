@@ -5,6 +5,9 @@ import { BiSearch } from 'react-icons/bi';
 import { HiHome } from 'react-icons/hi';
 import { RxCaretLeft, RxCaretRight } from 'react-icons/rx';
 import { twMerge } from 'tailwind-merge';
+import { FaUserAlt } from 'react-icons/fa';
+import toast from 'react-hot-toast';
+import Cookies from 'js-cookie';
 
 import useAuthModal from '@/hooks/useAuthModal';
 import useJoinModal from '@/hooks/useJoinModal';
@@ -13,11 +16,6 @@ import usePlayer from '@/hooks/usePlayer';
 
 import Button from './Button';
 import JoinModal from './JoinModal';
-
-import { FaUserAlt } from 'react-icons/fa';
-import toast from 'react-hot-toast';
-import { useEffect, useState } from 'react';
-import { useAccessToken } from '../hooks/AccessTokenContext';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -30,38 +28,18 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const joinModal = useJoinModal();
   const router = useRouter();
 
-  const { user } = useUser();
-
-  const { accessToken, setAccessToken } = useAccessToken();
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // 클라이언트 측에서만 실행됨
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        setAccessToken(token);
-      }
-    }
-  }, []); // 빈 배열로 useEffect를 설정해 처음에만 실행되도록 함
-
-  useEffect(() => {
-    if (accessToken) {
-      router.refresh();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken]); // accessToken이 변경될 때만 router.refresh()가 호출되도록 설정
+  const { user, setUser } = useUser();
 
   const handleLogout = async () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setAccessToken(null); // 상태 초기화
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
+    setUser(null);
 
     player.reset();
     router.refresh();
 
     toast.success('Logged out!');
-    window.location.reload(); // 페이지 새로고침
+    // window.location.reload(); // Refresh the page
   };
 
   return (
@@ -154,7 +132,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             gap-x-4
         "
         >
-          {accessToken ? (
+          {user ? (
             <div
               className="
                 flex 
