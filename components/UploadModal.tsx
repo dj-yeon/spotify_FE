@@ -39,7 +39,24 @@ const UploadModal = () => {
   }
 
   // When selecting a file, upload it first.
-  const handleFileUpload = async (file: File, type: 'image' | 'song') => {
+  const handleFileUpload = async (
+    file: File,
+    type: 'image' | 'song',
+    inputRef: HTMLInputElement,
+  ) => {
+    const MAX_SIZE_MB = 10; // 10MB 제한
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024; // 10MB를 바이트로 변환
+
+    // 파일 크기 확인
+    if (file.size > MAX_SIZE_BYTES) {
+      toast.error(`File size should not exceed ${MAX_SIZE_MB} MB.`);
+
+      // 파일 입력 필드 초기화 (화면 상에서도 초기화)
+      inputRef.value = ''; // 파일 입력 필드 값 리셋
+
+      return null; // null을 반환하여 이후 처리 중단
+    }
+
     const formData = new FormData();
     formData.append(type, file);
 
@@ -51,13 +68,15 @@ const UploadModal = () => {
         },
       });
 
-      console.log('Upload successful:', response);
-
       return response.data.fileName;
     } catch (error) {
       console.error(`Failed to upload ${type}:`, error);
       toast.error(`Failed to upload ${type}.`);
-      throw error;
+
+      // 파일 입력 필드 초기화 (업로드 실패 시에도)
+      inputRef.value = ''; // 파일 입력 필드 값 리셋
+
+      return null;
       ``;
     }
   };
@@ -139,9 +158,13 @@ const UploadModal = () => {
             accept=".mp3"
             onChange={async (e) => {
               const file = e.target.files?.[0];
+              const inputRef = e.target; // 파일 입력 요소 참조
+
               if (file) {
-                const fileName = await handleFileUpload(file, 'song');
-                setValue('song', fileName); // 업로드된 파일 경로를 설정
+                const fileName = await handleFileUpload(file, 'song', inputRef);
+                if (fileName) {
+                  setValue('song', fileName); // 업로드된 파일 경로를 설정
+                }
               }
             }}
           />
@@ -155,8 +178,14 @@ const UploadModal = () => {
             accept="image/*"
             onChange={async (e) => {
               const file = e.target.files?.[0];
+              const inputRef = e.target; // 파일 입력 요소 참조
+
               if (file) {
-                const fileName = await handleFileUpload(file, 'image');
+                const fileName = await handleFileUpload(
+                  file,
+                  'image',
+                  inputRef,
+                );
                 setValue('image', fileName); // 업로드된 파일 경로를 설정
               }
             }}

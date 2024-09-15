@@ -10,6 +10,7 @@ import { Song } from '@/types';
 import MediaItem from './MediaItem';
 import useOnPlay from '@/hooks/useOnPlay';
 import useSubscribeModal from '@/hooks/useSubscribeModal';
+import toast from 'react-hot-toast';
 
 interface LibraryProps {
   songs: Song[];
@@ -28,9 +29,10 @@ const Library: React.FC<LibraryProps> = ({ songs }) => {
       return authModal.onOpen();
     }
 
-    // if (!subscription) {
-    //   return subscribeModal.onOpen();
-    // }
+    if (user.role === 'USER') {
+      toast.error('Only users with the ADMIN role can upload songs.');
+      return;
+    }
 
     return uploadModal.onOpen();
   };

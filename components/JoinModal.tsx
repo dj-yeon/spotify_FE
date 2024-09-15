@@ -119,8 +119,11 @@ const JoinModal = () => {
           id="role"
           disabled={isLoading}
           {...register('role', { required: true })}
-          defaultValue={RolesEnum.USER} // 기본값 설정
+          defaultValue={RolesEnum.USER} // USER 기본 선택
         >
+          <option value="" disabled>
+            Select a role
+          </option>
           <option value={RolesEnum.USER}>User</option>
           <option value={RolesEnum.ADMIN}>Admin</option>
         </Select>

@@ -22,7 +22,6 @@ export interface Song {
 export interface UsersModel {
   nickname: string;
   email: string;
-  // role: RolesEnum;
   // posts: PostsModel[];
   // likedSongs: LikedSong[];
   songs: Song[];
@@ -36,6 +35,12 @@ export interface UserDetails {
   avatar_url?: string;
   billing_address?: Stripe.Address;
   payment_method?: Stripe.PaymentMethod[Stripe.PaymentMethod.Type];
+  role: RolesEnum;
+}
+
+export enum RolesEnum {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
 }
 
 export interface Product {
