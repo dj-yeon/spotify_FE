@@ -11,7 +11,8 @@ const Account = () => {
           </h1>
         </div>
       </Header>
-      <AccountContent />
+      {/* <AccountContent /> */}
+      <h1 className="text-white text-3xl font-semibold">coming soon </h1>
     </div>
   );
 };

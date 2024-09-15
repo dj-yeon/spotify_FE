@@ -9,7 +9,6 @@ import useUploadModal from '@/hooks/useUploadModal';
 import { Song } from '@/types';
 import MediaItem from './MediaItem';
 import useOnPlay from '@/hooks/useOnPlay';
-import useSubscribeModal from '@/hooks/useSubscribeModal';
 import toast from 'react-hot-toast';
 
 interface LibraryProps {
@@ -17,7 +16,6 @@ interface LibraryProps {
 }
 
 const Library: React.FC<LibraryProps> = ({ songs }) => {
-  const subscribeModal = useSubscribeModal();
   const authModal = useAuthModal();
   const uploadModal = useUploadModal();
   const { user, subscription } = useUser();
