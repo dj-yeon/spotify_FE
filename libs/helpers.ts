@@ -1,10 +1,14 @@
 import { Price } from '@/types';
 
-export const getURL = () => {
+export const getURL = (): string => {
   let url =
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.NEXT_PUBLIC_VERCEL_URL ??
-    'http://localhost:3000/';
+    process.env.NEXT_PUBLIC_SERVER_BASE_URL;
+
+  if (!url) {
+    throw new Error('No environment URL is defined'); 
+  }
 
   url = url.includes('http') ? url : `https://${url}`;
   url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;

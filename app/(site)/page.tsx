@@ -34,6 +34,7 @@ export default function Home() {
   // 최초 로드 시 데이터를 가져오는 로직
   useEffect(() => {
     fetchMoreSongs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
