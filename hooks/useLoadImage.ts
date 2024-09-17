@@ -1,17 +1,3 @@
-// import { Song } from '@/types';
-
-// const useLoadImage = (song: Song) => {
-//   if (!song || !song.imageFileName) {
-//     return null;
-//   }
-
-//   const imagePath = `http://localhost:8000/public/posts-image/${song.imageFileName}`;
-
-//   return imagePath;
-// };
-
-// export default useLoadImage;
-
 import axiosInstance from '@/libs/axios';
 import { Song } from '@/types';
 import { useState, useEffect } from 'react';
