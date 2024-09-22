@@ -39,6 +39,7 @@ const UploadModal = () => {
     if (!isLoading && !user) {
       return authModal.onOpen();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, router, user]);
 
   // When selecting a file, upload it first.
