@@ -136,23 +136,37 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
         "
         >
           {user ? (
-            <div
-              className="
+            <>
+              <div>
+                <Button
+                  onClick={infoModal.onOpen}
+                  className="
+                  bg-transparent
+                  text-neutral-300
+                  font-medium
+              "
+                >
+                  Site Guide
+                </Button>
+              </div>
+              <div
+                className="
                 flex 
                 gap-x-4 
                 items-center
                 "
-            >
-              <Button onClick={handleLogout} className="bg-white px-6 py-2">
-                Logout
-              </Button>
-              <Button
-                onClick={() => router.push('/account')}
-                className="bg-white"
               >
-                <FaUserAlt />
-              </Button>
-            </div>
+                <Button onClick={handleLogout} className="bg-white px-6 py-2">
+                  Logout
+                </Button>
+                <Button
+                  onClick={() => router.push('/account')}
+                  className="bg-white"
+                >
+                  <FaUserAlt />
+                </Button>
+              </div>
+            </>
           ) : (
             <>
               <div>
@@ -164,7 +178,7 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
                     font-medium
                 "
                 >
-                  사이트 안내
+                  Site Guide
                 </Button>
               </div>
               <div>
