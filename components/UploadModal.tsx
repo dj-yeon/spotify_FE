@@ -2,7 +2,7 @@
 
 import useUploadModal from '@/hooks/useUploadModal';
 import { useUser } from '@/hooks/useUser';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -34,13 +34,6 @@ const UploadModal = () => {
     });
 
   const token = Cookies.get('accessToken'); // 클라이언트 측 쿠키에서 토큰을 가져옴
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      return authModal.onOpen();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, router, user]);
 
   // When selecting a file, upload it first.
   const handleFileUpload = async (

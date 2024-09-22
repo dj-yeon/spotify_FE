@@ -22,8 +22,8 @@ const LikedContent: React.FC<LikedContentProps> = ({ songs }) => {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.replace('/'); // Redirect to home if not authenticated
-      authModal.onOpen(); // Open the authentication modal
+      router.replace('/');
+      authModal.onOpen();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, router, user]);
