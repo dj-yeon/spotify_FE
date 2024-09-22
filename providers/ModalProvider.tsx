@@ -7,11 +7,11 @@ import AuthModal from '@/components/AuthModal';
 import UploadModal from '@/components/UploadModal';
 import { ProductWithPrice } from '@/types';
 import JoinModal from '@/components/JoinModal';
+import InfoModal from '@/components/InfoModal';
 
-interface ModalProviderProps {
-}
+interface ModalProviderProps {}
 
-const ModalProvider: React.FC<ModalProviderProps> = ({  }) => {
+const ModalProvider: React.FC<ModalProviderProps> = ({}) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -27,6 +27,7 @@ const ModalProvider: React.FC<ModalProviderProps> = ({  }) => {
       <AuthModal />
       <JoinModal />
       <UploadModal />
+      <InfoModal />
     </>
   );
 };

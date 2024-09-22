@@ -16,6 +16,7 @@ import usePlayer from '@/hooks/usePlayer';
 
 import Button from './Button';
 import JoinModal from './JoinModal';
+import useInfoModal from '@/hooks/useInfoModal';
 
 interface HeaderProps {
   children: React.ReactNode;
@@ -26,6 +27,8 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const player = usePlayer();
   const authModal = useAuthModal();
   const joinModal = useJoinModal();
+  const infoModal = useInfoModal();
+
   const router = useRouter();
 
   const { user, setUser } = useUser();
@@ -152,6 +155,18 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             </div>
           ) : (
             <>
+              <div>
+                <Button
+                  onClick={infoModal.onOpen}
+                  className="
+                    bg-transparent
+                    text-neutral-300
+                    font-medium
+                "
+                >
+                  사이트 안내
+                </Button>
+              </div>
               <div>
                 <Button
                   onClick={joinModal.onOpen}
