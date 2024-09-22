@@ -17,6 +17,7 @@ import Cookies from 'js-cookie';
 
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const uploadModal = useUploadModal();
   const { user } = useUser();
   const router = useRouter();
@@ -61,6 +62,7 @@ const UploadModal = () => {
     formData.append(type, file);
 
     try {
+      setIsUploading(true);
       const response = await axiosInstance.post(`/common/${type}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -77,7 +79,8 @@ const UploadModal = () => {
       inputRef.value = ''; // 파일 입력 필드 값 리셋
 
       return null;
-      ``;
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -139,42 +142,22 @@ const UploadModal = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-4">
         <Input
           id="title"
-          disabled={isLoading}
+          disabled={isLoading || isUploading}
           {...register('title', { required: true })}
           placeholder="Song title"
         />
         <Input
           id="author"
-          disabled={isLoading}
+          disabled={isLoading || isUploading}
           {...register('author', { required: true })}
           placeholder="Song author"
         />
-        <div>
-          <div className="pb-1">Select a song file</div>
-          <Input
-            id="song"
-            type="file"
-            disabled={isLoading}
-            accept=".mp3"
-            onChange={async (e) => {
-              const file = e.target.files?.[0];
-              const inputRef = e.target; // 파일 입력 요소 참조
-
-              if (file) {
-                const fileName = await handleFileUpload(file, 'song', inputRef);
-                if (fileName) {
-                  setValue('song', fileName); // 업로드된 파일 경로를 설정
-                }
-              }
-            }}
-          />
-        </div>
         <div>
           <div className="pb-1">Select an image</div>
           <Input
             id="image"
             type="file"
-            disabled={isLoading}
+            disabled={isLoading || isUploading}
             accept="image/*"
             onChange={async (e) => {
               const file = e.target.files?.[0];
@@ -191,8 +174,29 @@ const UploadModal = () => {
             }}
           />
         </div>
-        <Button disabled={isLoading} type="submit">
-          Create
+
+        <div>
+          <div className="pb-1">Select a song file</div>
+          <Input
+            id="song"
+            type="file"
+            disabled={isLoading || isUploading}
+            accept=".mp3"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              const inputRef = e.target;
+              if (file) {
+                const fileName = await handleFileUpload(file, 'song', inputRef);
+                if (fileName) {
+                  setValue('song', fileName);
+                }
+              }
+            }}
+          />
+        </div>
+
+        <Button disabled={isLoading || isUploading} type="submit">
+          {isUploading ? 'Uploading...' : 'Create'}{' '}
         </Button>
       </form>
     </Modal>
