@@ -45,7 +45,7 @@ const UploadModal = () => {
     type: 'image' | 'song',
     inputRef: HTMLInputElement,
   ) => {
-    const MAX_SIZE_MB = 10; // 10MB 제한
+    const MAX_SIZE_MB = 5; // 5MB 제한
     const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024; // 10MB를 바이트로 변환
 
     // 파일 크기 확인
@@ -140,6 +140,20 @@ const UploadModal = () => {
       onChange={onChange}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-4">
+        <div className="text-sm text-gray-500">
+          <p>
+            If you need a sample song, you can download free music from the link
+            below:
+          </p>
+          <a
+            href="https://studio.youtube.com/channel/UC-u4YA1NtdEFQFMSu_tWEzA/music"
+            target="_blank"
+            className="text-blue-500 hover:underline"
+          >
+            Download Sample Music
+          </a>
+        </div>
+
         <Input
           id="title"
           disabled={isLoading || isUploading}
@@ -153,7 +167,7 @@ const UploadModal = () => {
           placeholder="Song author"
         />
         <div>
-          <div className="pb-1">Select an image</div>
+          <div className="pb-1">Select an image(max.5mb)</div>
           <Input
             id="image"
             type="file"
@@ -176,7 +190,7 @@ const UploadModal = () => {
         </div>
 
         <div>
-          <div className="pb-1">Select a song file</div>
+          <div className="pb-1">Select a song file(max.5mb)</div>
           <Input
             id="song"
             type="file"
