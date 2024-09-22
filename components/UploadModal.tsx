@@ -2,18 +2,18 @@
 
 import useUploadModal from '@/hooks/useUploadModal';
 import { useUser } from '@/hooks/useUser';
-import { useState } from 'react';
-import uniqid from 'uniqid';
+import { useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 import Modal from './Modal';
 import Input from './Input';
 import Button from './Button';
-import axiosInstance from '@/libs/axios';
-import { useRouter } from 'next/navigation';
 
-import Cookies from 'js-cookie';
+import axiosInstance from '@/libs/axios';
+import useAuthModal from '@/hooks/useAuthModal';
 
 const UploadModal = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +21,7 @@ const UploadModal = () => {
   const uploadModal = useUploadModal();
   const { user } = useUser();
   const router = useRouter();
+  const authModal = useAuthModal();
 
   const { register, handleSubmit, reset, setValue, getValues } =
     useForm<FieldValues>({
@@ -34,10 +35,11 @@ const UploadModal = () => {
 
   const token = Cookies.get('accessToken'); // 클라이언트 측 쿠키에서 토큰을 가져옴
 
-  if (!token) {
-    // console.error('Access token is missing');
-    return [];
-  }
+  useEffect(() => {
+    if (!isLoading && !user) {
+      return authModal.onOpen();
+    }
+  }, [isLoading, router, user]);
 
   // When selecting a file, upload it first.
   const handleFileUpload = async (

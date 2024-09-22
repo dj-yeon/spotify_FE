@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/useUser';
 import { Song } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import useAuthModal from '@/hooks/useAuthModal';
 
 interface LikedContentProps {
   songs: Song[];
@@ -15,13 +16,15 @@ interface LikedContentProps {
 const LikedContent: React.FC<LikedContentProps> = ({ songs }) => {
   const router = useRouter();
   const { isLoading, user } = useUser();
+  const authModal = useAuthModal();
 
   const onPlay = useOnPlay(songs);
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.replace('/');
+      return authModal.onOpen();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, router, user]);
 
   if (songs.length === 0) {
