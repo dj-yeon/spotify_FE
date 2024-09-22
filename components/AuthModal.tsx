@@ -66,7 +66,7 @@ const AuthModal = () => {
 
       // accessToken을 HTTP-only 쿠키에 저장
       document.cookie = `accessToken=${accessToken}; Path=/; Secure; SameSite=Strict`;
-      document.cookie = `refreshToken=${refreshToken}; Path=/; Secure; SameSite=Strict`;
+      // document.cookie = `refreshToken=${refreshToken}; Path=/; Secure; SameSite=Strict`;
 
       setUser(userDetail);
 
@@ -80,7 +80,7 @@ const AuthModal = () => {
 
       onClose();
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error('Your login details are incorrect.\nPlease try again.');
 
       // 콘솔에 자세한 에러 정보 출력
       if (error instanceof Error) {

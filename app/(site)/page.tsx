@@ -6,6 +6,7 @@ import { Song } from '@/types';
 import PageContent from './components/PageContent';
 import Header from '@/components/Header';
 import ListItem from '@/components/ListItem';
+import Button from '@/components/Button';
 
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>([]); // 상태를 Song[]로 명시
@@ -34,7 +35,7 @@ export default function Home() {
   // 최초 로드 시 데이터를 가져오는 로직
   useEffect(() => {
     fetchMoreSongs();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -42,11 +43,10 @@ export default function Home() {
       <Header>
         <div className="mb-2">
           <h1 className="text-white text-3xl font-semibold">Welcome back</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mt-4">
-            There are two role: user, admin 유튜브와 강의를 참고하여 nestjs,
-            nextjs를 사용한 포트폴리오를 만들어 보았다. <br />
-            현재 1년간 nextjs, nestjs를 이용해서 일하고 있다.
-          </div>
+          <br />
+
+          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 mt-4">
             <ListItem
               image="/images/liked.png"
@@ -63,12 +63,9 @@ export default function Home() {
         <PageContent songs={songs} />
         {hasMore && (
           <div className="flex justify-center mt-4">
-            <button
-              className="bg-blue-500 text-white py-2 px-4 rounded"
-              onClick={fetchMoreSongs}
-            >
+            <Button onClick={fetchMoreSongs} className="bg-white px-6 py-2">
               + More
-            </button>
+            </Button>
           </div>
         )}
         {!hasMore && (
