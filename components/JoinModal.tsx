@@ -59,7 +59,7 @@ const JoinModal = () => {
 
       // accessToken을 HTTP-only 쿠키에 저장
       document.cookie = `accessToken=${accessToken}; Path=/; Secure; SameSite=Strict`;
-      document.cookie = `refreshToken=${refreshToken}; Path=/; Secure; SameSite=Strict`;
+      // document.cookie = `refreshToken=${refreshToken}; Path=/; Secure; SameSite=Strict`;
 
       setUser(userDetail);
 
@@ -67,14 +67,15 @@ const JoinModal = () => {
 
       toast.success('Logged in successfully!');
 
-      //      window.location.reload(); // 페이지 새로고침
-
       reset();
 
       onClose();
     } catch (error: any) {
-      setErrorMessage(error.response?.data?.message || 'Something went wrong'); // 오류 메시지 설정
-      toast.error('Something went wrong');
+      setErrorMessage(
+        Array.isArray(error.response?.data?.message)
+          ? error.response.data.message.join('\n') // 배열일 경우 각 메시지를 줄바꿈으로 연결
+          : error.response?.data?.message || 'Something went wrong',
+      );
 
       // 콘솔에 자세한 에러 정보 출력
       console.error('Error message:', error.message);
@@ -94,7 +95,12 @@ const JoinModal = () => {
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-4">
         {errorMessage && (
-          <div className="text-red-500 text-sm mb-2">{errorMessage}</div>
+          <div
+            className="text-red-500 text-sm mb-2"
+            dangerouslySetInnerHTML={{
+              __html: errorMessage.replace(/\n/g, '<br />'),
+            }}
+          />
         )}
         <Input
           id="nickname"
