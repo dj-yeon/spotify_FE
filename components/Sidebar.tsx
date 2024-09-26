@@ -12,6 +12,8 @@ import usePlayer from '@/hooks/usePlayer';
 import { twMerge } from 'tailwind-merge';
 import getSongsByUserId from '@/actions/getSongsByUserId';
 
+import React from 'react';
+
 interface SidebarProps {
   children: React.ReactNode;
   songs: Song[];
@@ -52,10 +54,10 @@ const Sidebar: React.FC<SidebarProps> = ({ children, songs }) => {
             <SidebarItem key={item.label} {...item} />
           ))}
         </Box>
-        <Box className="overflow-y-auto h-full">
+        <Box className="overflow-y-auto flex-grow">
           <Library songs={songs} />
         </Box>
-        <Box className="overflow-y-auto h-[25%]">
+        <Box className="overflow-y-auto justify-end min-h-[20px]">
           <div className="text-white px-5 py-4 text-lg space-y-4">
             {/* USER Section */}
             <div>
